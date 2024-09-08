@@ -5,3 +5,11 @@ declare namespace NodeJS {
 		EXPRESS_PORT?: string
 	}
 }
+
+declare global {
+	export namespace Express {
+		export interface User {
+			id: string
+		}
+	}
+}
