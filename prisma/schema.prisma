@@ -13,4 +13,6 @@ model User {
   firstName String
   lastName  String
   password  String
+
+  @@map("users")
 }

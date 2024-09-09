@@ -1,11 +1,14 @@
+import MongoStore from 'connect-mongo'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express, { Application } from 'express'
 import session from 'express-session'
 import helmet from 'helmet'
+import mongoose from 'mongoose'
 import passport from 'passport'
 import router from './routes'
+import './utils/mongo'
 
 dotenv.config()
 
@@ -22,6 +25,9 @@ app.use(
 		secret: process.env.COOKIE_SECRET || 'secret-cookie-word',
 		resave: false,
 		saveUninitialized: false,
+		store: MongoStore.create({
+			client: mongoose.connection.getClient(),
+		}),
 		cookie: { secure: false, maxAge: 3600000 * 24, httpOnly: true },
 	})
 )

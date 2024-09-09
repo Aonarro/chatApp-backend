@@ -1,3 +1,5 @@
+import { User } from '@prisma/client'
+
 export type CreateUserCredentials = {
 	email: string
 	firstName: string
@@ -24,3 +26,5 @@ export type FindUserParams = Partial<{
 export type FindUserOptions = Partial<{
 	includePassword: boolean
 }>
+
+export type UserWithoutPassword = Omit<User, 'password'>

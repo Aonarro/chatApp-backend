@@ -1,6 +1,6 @@
-import { Request, Response, Router } from 'express'
-import passport from 'passport'
-import { logout, register } from '../controllers/users.controller'
+import { Router } from 'express'
+import { login, logout, register } from '../controllers/users.controller'
+import { authenticatedGuard, localAuthGuard } from '../guards/auth-guards'
 import '../strategies/local-strategy'
 import {
 	createUserValidation,
@@ -22,14 +22,12 @@ router.post(
 	'/auth/login',
 	loginUserValidation,
 	handleValidationErrors,
-	passport.authenticate('local'),
-	(req: Request, res: Response) => {
-		res.status(201).json({ msg: 'login successful' })
-	}
+	localAuthGuard,
+	login
 )
 //status
-router.get('/auth/status', status)
+router.get('/auth/status', authenticatedGuard, status)
 //logout
-router.get('/auth/logout', logout)
+router.get('/auth/logout', authenticatedGuard, logout)
 
 export default router

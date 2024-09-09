@@ -1,11 +1,8 @@
-import { User } from '@prisma/client'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { validateUser } from '../services/auth.service'
 import { findUser } from '../services/users.service'
-
-// Определяем типы
-type UserWithoutPassword = Omit<User, 'password'>
+import { UserWithoutPassword } from '../types/users'
 
 passport.serializeUser(
 	(user: Express.User, done: (err: any, id?: number) => void) => {
