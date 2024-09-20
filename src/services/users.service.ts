@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
 import {
 	CreateUserCredentials,
 	FindUserOptions,
@@ -48,6 +48,19 @@ export const findUser = async (
 			firstName: true,
 			lastName: true,
 			password: options?.includePassword || false,
+			participantId: true,
+			participant: true,
+		},
+	})
+}
+
+export const saveUser = async (user: User) => {
+	console.log(user.participantId)
+
+	return await prisma.user.update({
+		where: { id: user.id },
+		data: {
+			participantId: user.participantId ? user.participantId : null,
 		},
 	})
 }

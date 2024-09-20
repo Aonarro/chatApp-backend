@@ -19,16 +19,19 @@ export const register = async (
 export const login = (req: Request, res: Response, next: NextFunction) => {
 	req.sessionStore.get(req.sessionID, (err, session) => {
 		console.log('Inside Session:', session)
+		console.log('Inside Session:', req.sessionID)
 	})
-	res.sendStatus(200)
+	res.status(200).json(req.user)
 }
 
 export const status = (req: Request, res: Response, next: NextFunction) => {
-	res.send(req.user)
+	console.log('status:', req.sessionID)
+	res.send(req.user).status(200)
 }
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
-	req.logout(err => {
-		return err ? res.send(400) : res.send(200)
+	req.logout((err) => {
+		return err ? res.sendStatus(400) : res.sendStatus(200)
 	})
+	res.clearCookie('connect.sid')
 }

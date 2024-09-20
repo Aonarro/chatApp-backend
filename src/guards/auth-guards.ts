@@ -35,5 +35,5 @@ export const authenticatedGuard = (
 	if (req.isAuthenticated()) {
 		return next()
 	}
-	return res.status(401).json({ message: 'Unauthorized' })
+	return res.status(403).json({ message: 'Forbidden resource' })
 }

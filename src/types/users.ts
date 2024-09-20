@@ -28,3 +28,11 @@ export type FindUserOptions = Partial<{
 }>
 
 export type UserWithoutPassword = Omit<User, 'password'>
+
+export type RequestUserDetails = {
+	id: number
+	email: string
+	firstName: string
+	lastName: string
+	participantId: number
+}

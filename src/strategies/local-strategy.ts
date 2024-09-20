@@ -6,6 +6,8 @@ import { UserWithoutPassword } from '../types/users'
 
 passport.serializeUser(
 	(user: Express.User, done: (err: any, id?: number) => void) => {
+		console.log(user)
+
 		done(null, (user as UserWithoutPassword).id)
 	}
 )

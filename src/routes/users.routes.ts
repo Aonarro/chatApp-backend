@@ -2,9 +2,9 @@ import { Router } from 'express'
 import { login, logout, register } from '../controllers/users.controller'
 import { authenticatedGuard, localAuthGuard } from '../guards/auth-guards'
 import '../strategies/local-strategy'
+import { handleValidationErrors } from '../utils/helpers'
 import {
 	createUserValidation,
-	handleValidationErrors,
 	loginUserValidation,
 } from '../utils/validationSchemas/userValidationSchema'
 import { status } from './../controllers/users.controller'
