@@ -8,32 +8,24 @@ datasource db {
 }
 
 model User {
-  id            Int          @id @default(autoincrement())
-  email         String       @unique
-  firstName     String
-  lastName      String
-  password      String
-  participant   Participant? @relation("UserParticipant", fields: [participantId], references: [id])
-  participantId Int?         @unique
+  id                    Int            @id @default(autoincrement())
+  email                 String?        @unique
+  firstName             String
+  lastName              String
+  password              String
+  conversationsCreated  Conversation[] @relation("CreatorConversations")
+  conversationsReceived Conversation[] @relation("RecipientConversations")
 
   @@map("users")
 }
 
 model Conversation {
-  id           Int           @id @default(autoincrement())
-  participants Participant[] @relation("ConversationParticipants")
+  id          Int  @id @default(autoincrement())
+  creator     User @relation("CreatorConversations", fields: [creatorId], references: [id])
+  creatorId   Int
+  recipient   User @relation("RecipientConversations", fields: [recipientId], references: [id])
+  recipientId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  @@unique([creatorId, recipientId])
   @@map("conversations")
-}
-
-model Participant {
-  id            Int            @id @default(autoincrement())
-  conversations Conversation[] @relation("ConversationParticipants")
-  user          User?          @relation("UserParticipant")
-  userId        Int?           @unique
-
-  @@map("participants")
 }
