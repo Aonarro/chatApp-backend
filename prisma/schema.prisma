@@ -15,17 +15,34 @@ model User {
   password              String
   conversationsCreated  Conversation[] @relation("CreatorConversations")
   conversationsReceived Conversation[] @relation("RecipientConversations")
+  messages              Message[]      @relation("MessageSender")
 
   @@map("users")
 }
 
 model Conversation {
-  id          Int  @id @default(autoincrement())
-  creator     User @relation("CreatorConversations", fields: [creatorId], references: [id])
-  creatorId   Int
-  recipient   User @relation("RecipientConversations", fields: [recipientId], references: [id])
-  recipientId Int
+  id                Int       @id @default(autoincrement())
+  creator           User      @relation("CreatorConversations", fields: [creatorId], references: [id])
+  creatorId         Int
+  recipient         User      @relation("RecipientConversations", fields: [recipientId], references: [id])
+  recipientId       Int
+  messages          Message[] @relation("ConversationMessages")
+  createdAt         DateTime  @default(now())
+  lastMessageSent   String?
+  lastMessageSentAt DateTime?
 
   @@unique([creatorId, recipientId])
   @@map("conversations")
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversation   Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
+  conversationId Int
+  author         User         @relation("MessageSender", fields: [authorId], references: [id])
+  authorId       Int
+  createdAt      DateTime     @default(now())
+  content        String
+
+  @@map("messages")
 }

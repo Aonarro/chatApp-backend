@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `conversations` ADD COLUMN `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    ADD COLUMN `lastMessageSent` VARCHAR(191) NULL,
+    ADD COLUMN `lastMessageSentAt` DATETIME(3) NULL;

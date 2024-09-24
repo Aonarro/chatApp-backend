@@ -11,9 +11,9 @@ const router = Router()
 //create new conversation
 router.post(
 	'/conversations',
+	authenticatedGuard,
 	createConversationValidation,
 	handleValidationErrors,
-	authenticatedGuard,
 	createConversation
 )
 

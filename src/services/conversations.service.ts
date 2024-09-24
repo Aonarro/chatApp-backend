@@ -23,7 +23,7 @@ export const createConversationByParams = async (
 		throw new Error('Cannot create conversation')
 	}
 
-	if (id === recipientId) {
+	if (id === +recipientId) {
 		throw new Error('Cannot create conversation with yourself')
 	}
 
