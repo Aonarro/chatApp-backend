@@ -29,7 +29,10 @@ export const createConversationByParams = async (
 
 	const existingConversation = await prisma.conversation.findFirst({
 		where: {
-			OR: [{ creatorId: id, recipientId: +recipientId }],
+			OR: [
+				{ creatorId: id, recipientId: +recipientId },
+				{ creatorId: +recipientId, recipientId: id },
+			],
 		},
 	})
 

@@ -28,7 +28,7 @@ model Conversation {
   recipientId       Int
   messages          Message[] @relation("ConversationMessages")
   createdAt         DateTime  @default(now())
-  lastMessageSent   String?
+  lastMessageSent   String?   @db.Text
   lastMessageSentAt DateTime?
 
   @@unique([creatorId, recipientId])
@@ -42,7 +42,7 @@ model Message {
   author         User         @relation("MessageSender", fields: [authorId], references: [id])
   authorId       Int
   createdAt      DateTime     @default(now())
-  content        String
+  content        String       @db.Text
 
   @@map("messages")
 }
