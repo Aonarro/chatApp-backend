@@ -36,6 +36,6 @@ export const getConversations = async (
 
 		res.status(200).json(result)
 	} catch (error) {
-		console.log(error)
+		errorHandler(error, res, 404)
 	}
 }

@@ -4,6 +4,8 @@ import {
 	getMessagesByConversationId,
 } from '../services/message.service'
 import { RequestUserDetails } from '../types/users'
+import { errorHandler } from '../utils/helpers'
+import { eventEmitter } from '../websocket/websocket'
 
 export const createMessage = async (
 	req: Request,
@@ -12,13 +14,18 @@ export const createMessage = async (
 ) => {
 	try {
 		const typedRequest = req as Request & { user: RequestUserDetails }
+
 		const result = await createMessageByParams({
 			...typedRequest.body,
 			user: typedRequest.user,
 		})
+
+		console.log('on message fn', result)
+
+		eventEmitter.emit('createMessage', result)
 		res.status(201).json(result)
 	} catch (error) {
-		console.error(error)
+		errorHandler(error, res, 400)
 	}
 }
 
@@ -30,14 +37,19 @@ export const getMessagesFromConversation = async (
 	try {
 		const typedRequest = req as Request & { user: RequestUserDetails }
 
-		const { conversationId } = req.params
+		const { conversationId } = typedRequest.params
 
 		console.log(conversationId)
 
-		const result = await getMessagesByConversationId(+conversationId)
+		const messages = await getMessagesByConversationId(+conversationId)
+
+		const result = {
+			id: +conversationId,
+			messages,
+		}
 
 		res.status(200).json(result)
 	} catch (error) {
-		console.log(error)
+		errorHandler(error, res, 404)
 	}
 }

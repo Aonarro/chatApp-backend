@@ -10,14 +10,13 @@ import {
 import { status } from './../controllers/users.controller'
 
 const router = Router()
-//register
 router.post(
 	'/auth/register',
 	createUserValidation,
 	handleValidationErrors,
 	register
 )
-//login
+
 router.post(
 	'/auth/login',
 	loginUserValidation,
@@ -25,9 +24,9 @@ router.post(
 	localAuthGuard,
 	login
 )
-//status
+
 router.get('/auth/status', authenticatedGuard, status)
-//logout
+
 router.get('/auth/logout', authenticatedGuard, logout)
 
 export default router

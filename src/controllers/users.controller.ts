@@ -7,6 +7,10 @@ export const register = async (
 	res: Response,
 	next: NextFunction
 ) => {
+	/*  #swagger.requestBody = {
+            required: true,
+            schema: { $ref: "#/components/schemas/CreateUserCredentials" }
+    } */
 	try {
 		const user = await createUser(req.body)
 
@@ -17,15 +21,11 @@ export const register = async (
 }
 
 export const login = (req: Request, res: Response, next: NextFunction) => {
-	req.sessionStore.get(req.sessionID, (err, session) => {
-		console.log('Inside Session:', session)
-		console.log('Inside Session:', req.sessionID)
-	})
+	req.sessionStore.get(req.sessionID, (err, session) => {})
 	res.status(200).json(req.user)
 }
 
 export const status = (req: Request, res: Response, next: NextFunction) => {
-	console.log('status:', req.sessionID)
 	res.send(req.user).status(200)
 }
 

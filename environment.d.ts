@@ -1,3 +1,4 @@
+import { User } from 'passport'
 declare namespace NodeJS {
 	export interface ProcessEnv {
 		MYSQL_DB_HOST? = string
@@ -16,5 +17,12 @@ declare global {
 		export interface User {
 			id: number
 		}
+	}
+}
+
+declare module 'http' {
+	interface IncomingMessage {
+		user?: User // Свойство user, добавляемое Passport.js
+		isAuthenticated?: () => boolean // Метод isAuthenticated, который добавляет Passport.js
 	}
 }
