@@ -34,8 +34,10 @@ export const createMessageByParams = async (params: createMessageParams) => {
 	await prisma.conversation.update({
 		where: { id: +params.conversationId },
 		data: {
-			lastMessageSent: newMessage.content,
-			lastMessageSentAt: new Date(),
+			lastMessageSent: {
+				connect: { id: newMessage.id },
+			},
+			lastMessageSentAt: newMessage.createdAt,
 		},
 	})
 
@@ -48,7 +50,21 @@ export const createMessageByParams = async (params: createMessageParams) => {
 				select: {
 					id: true,
 					createdAt: true,
-					lastMessageSent: true,
+					lastMessageSent: {
+						select: {
+							id: true,
+							createdAt: true,
+							content: true,
+							author: {
+								select: {
+									id: true,
+									email: true,
+									firstName: true,
+									lastName: true,
+								},
+							},
+						},
+					},
 					creator: {
 						select: {
 							id: true,
@@ -78,6 +94,8 @@ export const createMessageByParams = async (params: createMessageParams) => {
 			content: true,
 		},
 	})
+
+	console.log('IN MESSAGEEEEE', newMessageResponseData)
 
 	if (newMessageResponseData) {
 		const formattedMessage = {

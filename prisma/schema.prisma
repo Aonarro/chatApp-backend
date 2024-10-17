@@ -28,21 +28,23 @@ model Conversation {
   recipientId       Int
   messages          Message[] @relation("ConversationMessages")
   createdAt         DateTime  @default(now())
-  lastMessageSent   String?   @db.Text
+  lastMessageSent   Message?  @relation(fields: [messageId], references: [id])
   lastMessageSentAt DateTime?
+  messageId         Int?
 
   @@unique([creatorId, recipientId])
   @@map("conversations")
 }
 
 model Message {
-  id             Int          @id @default(autoincrement())
-  conversation   Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
+  id             Int            @id @default(autoincrement())
+  conversation   Conversation   @relation("ConversationMessages", fields: [conversationId], references: [id])
   conversationId Int
-  author         User         @relation("MessageSender", fields: [authorId], references: [id])
+  author         User           @relation("MessageSender", fields: [authorId], references: [id])
   authorId       Int
-  createdAt      DateTime     @default(now())
-  content        String       @db.Text
+  createdAt      DateTime       @default(now())
+  content        String         @db.Text
+  Conversation   Conversation[]
 
   @@map("messages")
 }

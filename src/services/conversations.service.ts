@@ -58,6 +58,21 @@ export const findConversationByUserId = async (userId: number) => {
 			OR: [{ creatorId: userId }, { recipientId: userId }],
 		},
 		include: {
+			lastMessageSent: {
+				select: {
+					id: true,
+					createdAt: true,
+					content: true,
+					author: {
+						select: {
+							id: true,
+							email: true,
+							firstName: true,
+							lastName: true,
+						},
+					},
+				},
+			},
 			creator: {
 				select: {
 					id: true,
@@ -75,10 +90,13 @@ export const findConversationByUserId = async (userId: number) => {
 				},
 			},
 		},
+		orderBy: { lastMessageSentAt: 'desc' },
 	})
 
+	console.log('CONVERSATIONSSSSS', conversations)
+
 	const formattedConversations = conversations.map(
-		({ creatorId, recipientId, ...rest }) => ({
+		({ creatorId, recipientId, messageId, ...rest }) => ({
 			...rest,
 		})
 	)

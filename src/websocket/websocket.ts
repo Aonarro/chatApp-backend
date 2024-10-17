@@ -29,11 +29,6 @@ export const initializeSocket = (server: HttpServer) => {
 	io.use((socket, next) => {
 		const req = socket.request as IncomingMessageWithPassport
 
-		console.log(
-			'1321y732167831728637821678361276378216312737261736128',
-			req.isAuthenticated()
-		)
-
 		if (req.isAuthenticated()) {
 			return next()
 		}
@@ -45,8 +40,6 @@ export const initializeSocket = (server: HttpServer) => {
 	io.on('connection', (socket: Socket) => {
 		const req = socket.request as IncomingMessageWithPassport
 		socket.emit('Connected to the chat', { status: 'good' })
-
-		console.log(req)
 
 		setUserSocket(req.user.id, socket)
 	})
@@ -65,18 +58,8 @@ eventEmitter.on('createMessage', (data: CreateMessageResponse) => {
 			? getUserSocket(recipient.id)
 			: getUserSocket(creator.id)
 
-	console.log(
-		'recipientSocket',
-		(recipientSocket?.request as IncomingMessageWithPassport).user
-	)
-
-	console.log(
-		'authorSocket',
-		(authorSocket?.request as IncomingMessageWithPassport).user
-	)
-
-	recipientSocket?.emit('onMessage', data)
-	authorSocket?.emit('onMessage', data)
+	if (authorSocket) authorSocket?.emit('onMessage', data)
+	if (recipientSocket) recipientSocket?.emit('onMessage', data)
 })
 
 const sessions: Map<number, AuthenticatedSocket> = new Map()

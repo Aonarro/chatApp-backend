@@ -42,7 +42,7 @@ export const sessionMiddleware = session({
 	}),
 	cookie: {
 		secure: false,
-		maxAge: 3600000 * 2,
+		maxAge: 36000000 * 2,
 		httpOnly: true,
 		sameSite: 'lax',
 	},
