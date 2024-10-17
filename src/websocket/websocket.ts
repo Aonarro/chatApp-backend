@@ -4,6 +4,13 @@ import passport from 'passport'
 import { Server, Socket } from 'socket.io'
 import { sessionMiddleware } from '..'
 import { wrap } from '../middlewares/websocketSessionMiddleware'
+import { CreateMessageResponse } from '../types/message'
+import { AuthenticatedSocket } from '../types/websocketSessions'
+
+export type IncomingMessageWithPassport = IncomingMessage & {
+	isAuthenticated: () => boolean
+	user?: any
+}
 
 export const eventEmitter = new EventEmitter()
 
@@ -20,10 +27,7 @@ export const initializeSocket = (server: HttpServer) => {
 	io.use(wrap(passport.initialize()))
 	io.use(wrap(passport.session()))
 	io.use((socket, next) => {
-		const req = socket.request as IncomingMessage & {
-			isAuthenticated: () => boolean
-			user?: any
-		}
+		const req = socket.request as IncomingMessageWithPassport
 
 		console.log(
 			'1321y732167831728637821678361276378216312737261736128',
@@ -37,111 +41,65 @@ export const initializeSocket = (server: HttpServer) => {
 		return next(new Error('Unauthorized1234'))
 	})
 
-	// io.engine.use(onlyForHandshake(sessionMiddleware))
-	// io.engine.use(onlyForHandshake(onlyForHandshake(passport.session)))
-	// io.engine.use(
-	// 	onlyForHandshake((req: Request, res: Response, next: NextFunction) => {
-	// 		console.log('USER', req.user)
-
-	// 		if (req.user) {
-	// 			next()
-	// 		} else {
-	// 			res.writeHead(401)
-	// 			res.end()
-	// 		}
-	// 	})
-	// )
-
-	// io.use(async (socket: Socket, next) => {
-	// 	const { cookie: clientCookie } = socket.handshake.headers
-	// 	if (!clientCookie) {
-	// 		console.log('Client has no cookies')
-	// 		return next(new Error('Not Authenticated. No cookies were sent'))
-	// 	}
-
-	// 	const parsedCookies = cookie.parse(clientCookie)
-	// 	const connect_sid = parsedCookies['connect.sid'] // Извлекаем connect.sid
-
-	// 	if (!connect_sid) {
-	// 		console.log('connect.sid не существует')
-	// 		return next(new Error('Не аутентифицирован. ID сессии не найден.'))
-	// 	}
-
-	// 	const signedSessionCookie = cookieParser.signedCookie(
-	// 		connect_sid,
-	// 		process.env.COOKIE_SECRET as string
-	// 	)
-	// 	console.log('signed cookie  ', signedSessionCookie)
-
-	// 	// console.log(socket.request)
-
-	// 	try {
-	// 		const sessionCollection = mongoose.connection.collection('sessions')
-	// 		// const sessionData = await sessionCollection.findOne({
-	// 		// 	_id: signedSessionCookie,
-	// 		// })
-
-	// 		if (typeof signedSessionCookie === 'string') {
-	// 			const sessionData = await sessionCollection.findOne({
-	// 				_id: new mongoose.Types.ObjectId(signedSessionCookie),
-	// 			})
-	// 			console.log('SESSION DATA', sessionData)
-	// 		}
-	// 	} catch (error) {
-	// 		console.log(error)
-	// 	}
-
-	// 	// if (!signedCookie) return next(new Error('Error signing cookie'))
-
-	// 	// const sessionRepository = getRepository(Session)
-	// 	// const sessionDB = await sessionRepository.findOne({ id: signedCookie })
-
-	// 	// if (!sessionDB) return next(new Error('No session found'))
-
-	// 	// const userFromJson = JSON.parse(sessionDB.json)
-	// 	// if (!userFromJson.passport || !userFromJson.passport.user) {
-	// 	// 	return next(new Error('Passport or User object does not exist.'))
-	// 	// }
-
-	// 	// const userDB = plainToInstance(User, userFromJson.passport.user)
-	// 	// socket.user = userDB // Добавляем пользователя в сокет
-	// 	next()
-	// })
 	////////////////////////////////////////////////////////////////////////////////////////
 	io.on('connection', (socket: Socket) => {
-		const req = socket.request as any
-		console.log('A user connected:', req.user)
+		const req = socket.request as IncomingMessageWithPassport
 		socket.emit('Connected to the chat', { status: 'good' })
 
-		eventEmitter.on('createMessage', (data) => {
-			console.log('User created event received', data)
+		console.log(req)
 
-			socket.emit('onMessage', data)
-		})
+		setUserSocket(req.user.id, socket)
 	})
 }
 
-// const sessions: Map<number, AuthenticatedSocket> = new Map()
+eventEmitter.on('createMessage', (data: CreateMessageResponse) => {
+	console.log('User created event received', data)
 
-// function getUserSocket(id: number): AuthenticatedSocket | undefined {
-// 	return sessions.get(id)
-// }
+	const {
+		message: { author },
+		conversation: { creator, recipient },
+	} = data
+	const authorSocket = getUserSocket(author.id)
+	const recipientSocket =
+		author.id === creator.id
+			? getUserSocket(recipient.id)
+			: getUserSocket(creator.id)
 
-// function setUserSocket(userId: number, socket: AuthenticatedSocket): void {
-// 	sessions.set(userId, socket)
-// }
+	console.log(
+		'recipientSocket',
+		(recipientSocket?.request as IncomingMessageWithPassport).user
+	)
 
-// function removeUserSocket(userId: number): void {
-// 	sessions.delete(userId)
-// }
+	console.log(
+		'authorSocket',
+		(authorSocket?.request as IncomingMessageWithPassport).user
+	)
 
-// function getSockets(): Map<number, AuthenticatedSocket> {
-// 	return sessions
-// }
+	recipientSocket?.emit('onMessage', data)
+	authorSocket?.emit('onMessage', data)
+})
 
-// export const SocketSessionManager = {
-// 	getUserSocket,
-// 	setUserSocket,
-// 	removeUserSocket,
-// 	getSockets,
-// }
+const sessions: Map<number, AuthenticatedSocket> = new Map()
+
+function getUserSocket(id: number): AuthenticatedSocket | undefined {
+	return sessions.get(id)
+}
+
+function setUserSocket(userId: number, socket: AuthenticatedSocket): void {
+	sessions.set(userId, socket)
+}
+
+function removeUserSocket(userId: number): void {
+	sessions.delete(userId)
+}
+
+function getSockets(): Map<number, AuthenticatedSocket> {
+	return sessions
+}
+
+export const SocketSessionManager = {
+	getUserSocket,
+	setUserSocket,
+	removeUserSocket,
+	getSockets,
+}

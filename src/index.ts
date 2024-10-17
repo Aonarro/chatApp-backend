@@ -9,9 +9,7 @@ import http from 'http'
 import mongoose from 'mongoose'
 import morgan from 'morgan'
 import passport from 'passport'
-import swaggerUi from 'swagger-ui-express'
 import router from './routes'
-import swaggerOutput from './swagger_output.json'
 import './utils/mongo'
 import { initializeSocket } from './websocket/websocket'
 
@@ -44,7 +42,7 @@ export const sessionMiddleware = session({
 	}),
 	cookie: {
 		secure: false,
-		maxAge: 36000 * 2,
+		maxAge: 3600000 * 2,
 		httpOnly: true,
 		sameSite: 'lax',
 	},
@@ -56,13 +54,6 @@ app.use(passport.session())
 
 // Routes setup
 app.use(router)
-
-//Swagger route
-app.use(
-	'/api-docs',
-	swaggerUi.serve,
-	swaggerUi.setup(swaggerOutput, { explorer: true })
-)
 
 initializeSocket(httpServer)
 

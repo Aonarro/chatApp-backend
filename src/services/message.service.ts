@@ -113,7 +113,7 @@ export const createMessageByParams = async (params: createMessageParams) => {
 		return formattedMessage
 	}
 
-	console.log(newMessageResponseData)
+	// console.log(newMessageResponseData)
 }
 
 export const getMessagesByConversationId = async (conversationId: number) => {

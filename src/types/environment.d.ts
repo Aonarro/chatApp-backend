@@ -1,3 +1,4 @@
+import 'http'
 import { User } from 'passport'
 declare namespace NodeJS {
 	export interface ProcessEnv {
@@ -20,9 +21,9 @@ declare global {
 	}
 }
 
-declare module 'http' {
+declare module 'node:http' {
 	interface IncomingMessage {
-		user?: User // Свойство user, добавляемое Passport.js
-		isAuthenticated?: () => boolean // Метод isAuthenticated, который добавляет Passport.js
+		user: User
+		isAuthenticated: () => boolean
 	}
 }
