@@ -1,11 +1,11 @@
 import { body } from 'express-validator'
 
 export const createConversationValidation = [
-	body('recipientId')
-		.isNumeric()
-		.withMessage('Recipient ID must be a number')
+	body('email')
+		.isEmail()
+		.withMessage('This field must be a valid email address')
 		.notEmpty()
-		.withMessage('Please provide a valid recipient ID'),
+		.withMessage('Please provide a valid recipient email'),
 
 	body('message').notEmpty().withMessage('Message is required'),
 ]

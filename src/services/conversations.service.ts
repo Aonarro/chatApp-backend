@@ -8,35 +8,26 @@ export const createConversationByParams = async (
 	id: number,
 	params: CreateConversationParams
 ) => {
-	console.log(id, params)
+	const { email } = params
 
-	const { recipientId, message } = params
-
-	const recipient = await findUser(
-		{ id: +recipientId },
-		{ includePassword: false }
-	)
-
-	console.log(recipient)
+	const recipient = await findUser({ email }, { includePassword: false })
 
 	if (!recipient) {
 		throw new Error('Cannot create conversation')
 	}
 
-	if (id === +recipientId) {
+	if (id === recipient.id) {
 		throw new Error('Cannot create conversation with yourself')
 	}
 
 	const existingConversation = await prisma.conversation.findFirst({
 		where: {
 			OR: [
-				{ creatorId: id, recipientId: +recipientId },
-				{ creatorId: +recipientId, recipientId: id },
+				{ creatorId: id, recipientId: recipient.id },
+				{ creatorId: recipient.id, recipientId: id },
 			],
 		},
 	})
-
-	console.log('conversation', existingConversation)
 
 	if (existingConversation) {
 		throw new Error('Conversation already exists')
@@ -45,7 +36,7 @@ export const createConversationByParams = async (
 	const newConversation = await prisma.conversation.create({
 		data: {
 			creatorId: id,
-			recipientId: +recipientId,
+			recipientId: recipient.id,
 		},
 	})
 
@@ -92,8 +83,6 @@ export const findConversationByUserId = async (userId: number) => {
 		},
 		orderBy: { lastMessageSentAt: 'desc' },
 	})
-
-	console.log('CONVERSATIONSSSSS', conversations)
 
 	const formattedConversations = conversations.map(
 		({ creatorId, recipientId, messageId, ...rest }) => ({

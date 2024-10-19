@@ -6,8 +6,6 @@ import { UserWithoutPassword } from '../types/users'
 
 passport.serializeUser(
 	(user: Express.User, done: (err: any, id?: number) => void) => {
-		console.log(user)
-
 		done(null, (user as UserWithoutPassword).id)
 	}
 )
@@ -40,7 +38,6 @@ passport.use(
 		) => {
 			try {
 				const validUser = await validateUser({ password, email })
-				console.log(validUser)
 
 				return done(null, validUser)
 			} catch (error) {

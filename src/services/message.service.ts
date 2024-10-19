@@ -95,8 +95,6 @@ export const createMessageByParams = async (params: createMessageParams) => {
 		},
 	})
 
-	console.log('IN MESSAGEEEEE', newMessageResponseData)
-
 	if (newMessageResponseData) {
 		const formattedMessage = {
 			message: {
@@ -130,8 +128,6 @@ export const createMessageByParams = async (params: createMessageParams) => {
 		}
 		return formattedMessage
 	}
-
-	// console.log(newMessageResponseData)
 }
 
 export const getMessagesByConversationId = async (conversationId: number) => {

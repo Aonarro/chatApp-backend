@@ -1,4 +1,4 @@
 export type CreateConversationParams = {
-	recipientId: number
+	email: string
 	message: string
 }

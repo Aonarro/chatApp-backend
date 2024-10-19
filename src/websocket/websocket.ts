@@ -29,6 +29,8 @@ export const initializeSocket = (server: HttpServer) => {
 	io.use((socket, next) => {
 		const req = socket.request as IncomingMessageWithPassport
 
+		console.log('authenicated socket')
+
 		if (req.isAuthenticated()) {
 			return next()
 		}
@@ -42,6 +44,18 @@ export const initializeSocket = (server: HttpServer) => {
 		socket.emit('Connected to the chat', { status: 'good' })
 
 		setUserSocket(req.user.id, socket)
+		// socket.join()
+		console.log(socket.rooms)
+
+		socket.on('onClientConnect', (data) => {
+			console.log('Client connected')
+			console.log(data)
+		})
+
+		socket.on('onTyping', (data) => {
+			console.log(`начал печатать...`)
+			console.log(data)
+		})
 	})
 }
 

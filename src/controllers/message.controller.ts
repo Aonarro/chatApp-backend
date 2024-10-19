@@ -20,8 +20,6 @@ export const createMessage = async (
 			user: typedRequest.user,
 		})
 
-		// console.log('on message fn', result)
-
 		eventEmitter.emit('createMessage', result)
 		res.status(201).json(result)
 	} catch (error) {
@@ -38,8 +36,6 @@ export const getMessagesFromConversation = async (
 		const typedRequest = req as Request & { user: RequestUserDetails }
 
 		const { conversationId } = typedRequest.params
-
-		// console.log(conversationId)
 
 		const messages = await getMessagesByConversationId(+conversationId)
 
