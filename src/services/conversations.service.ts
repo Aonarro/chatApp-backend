@@ -38,9 +38,46 @@ export const createConversationByParams = async (
 			creatorId: id,
 			recipientId: recipient.id,
 		},
+		include: {
+			lastMessageSent: {
+				select: {
+					id: true,
+					createdAt: true,
+					content: true,
+					author: {
+						select: {
+							id: true,
+							email: true,
+							firstName: true,
+							lastName: true,
+						},
+					},
+				},
+			},
+			creator: {
+				select: {
+					id: true,
+					email: true,
+					firstName: true,
+					lastName: true,
+				},
+			},
+			recipient: {
+				select: {
+					id: true,
+					email: true,
+					firstName: true,
+					lastName: true,
+				},
+			},
+		},
 	})
 
-	return newConversation
+	const { creatorId, recipientId, messageId, ...rest } = newConversation
+
+	console.log(newConversation)
+
+	return { ...rest }
 }
 
 export const findConversationByUserId = async (userId: number) => {
