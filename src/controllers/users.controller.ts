@@ -7,12 +7,17 @@ export const register = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	/*  #swagger.requestBody = {
-            required: true,
-            schema: { $ref: "#/components/schemas/CreateUserCredentials" }
-    } */
 	try {
 		const user = await createUser(req.body)
+
+		await new Promise((resolve, reject) => {
+			req.login(user, (err) => {
+				if (err) {
+					return reject(err)
+				}
+				resolve(next)
+			})
+		})
 
 		res.status(201).json(user)
 	} catch (error) {

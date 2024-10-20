@@ -29,7 +29,7 @@ export const createUser = async (userDetails: CreateUserCredentials) => {
 			email: true,
 			firstName: true,
 			lastName: true,
-			password: false,
+			password: true,
 		},
 	})
 

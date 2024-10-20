@@ -4,6 +4,7 @@ import passport from 'passport'
 import { Server, Socket } from 'socket.io'
 import { sessionMiddleware } from '..'
 import { wrap } from '../middlewares/websocketSessionMiddleware'
+import { Conversation } from '../types/conversations'
 import { CreateMessageResponse } from '../types/message'
 import { AuthenticatedSocket } from '../types/websocketSessions'
 
@@ -74,6 +75,12 @@ eventEmitter.on('createMessage', (data: CreateMessageResponse) => {
 
 	if (authorSocket) authorSocket?.emit('onMessage', data)
 	if (recipientSocket) recipientSocket?.emit('onMessage', data)
+})
+
+eventEmitter.on('createConversation', (payload: Conversation) => {
+	const recipientSocket = getUserSocket(payload.recipient.id)
+
+	if (recipientSocket) recipientSocket.emit('onNewConversation', payload)
 })
 
 const sessions: Map<number, AuthenticatedSocket> = new Map()
