@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
 	createMessage,
+	deleteMessageFromConversation,
 	getMessagesFromConversation,
 } from '../controllers/message.controller'
 import { authenticatedGuard } from '../guards/auth-guards'
@@ -10,7 +11,7 @@ import { createMessageValidation } from '../utils/validationSchemas/messageValid
 const router = Router()
 
 router.post(
-	'/messages',
+	'/conversations/:conversationId/messages',
 	authenticatedGuard,
 	createMessageValidation,
 	handleValidationErrors,
@@ -18,9 +19,15 @@ router.post(
 )
 
 router.get(
-	'/messages/:conversationId',
+	'/conversations/:conversationId/messages',
 	authenticatedGuard,
 	getMessagesFromConversation
+)
+
+router.delete(
+	'/conversations/:conversationId/messages/:messageId',
+	authenticatedGuard,
+	deleteMessageFromConversation
 )
 
 export default router

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import {
 	createMessageByParams,
+	deleteMessageById,
 	getMessagesByConversationId,
 } from '../services/message.service'
 import { RequestUserDetails } from '../types/users'
@@ -14,16 +15,21 @@ export const createMessage = async (
 ) => {
 	try {
 		const typedRequest = req as Request & { user: RequestUserDetails }
+		const { conversationId } = typedRequest.params
+		const { content } = typedRequest.body
+
+		console.log(conversationId, typedRequest.user, content)
 
 		const result = await createMessageByParams({
-			...typedRequest.body,
+			conversationId: +conversationId,
 			user: typedRequest.user,
+			content,
 		})
 
 		eventEmitter.emit('createMessage', result)
 		res.status(201).json(result)
 	} catch (error) {
-		errorHandler(error, res, 400)
+		errorHandler(error, res, 500)
 	}
 }
 
@@ -45,6 +51,27 @@ export const getMessagesFromConversation = async (
 		}
 
 		res.status(200).json(result)
+	} catch (error) {
+		errorHandler(error, res, 404)
+	}
+}
+
+export const deleteMessageFromConversation = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	try {
+		const typedRequest = req as Request & { user: RequestUserDetails }
+		const { conversationId, messageId } = typedRequest.params
+
+		await deleteMessageById({
+			conversationId: +conversationId,
+			messageId: +messageId,
+			userId: typedRequest.user.id,
+		})
+
+		res.sendStatus(204)
 	} catch (error) {
 		errorHandler(error, res, 404)
 	}

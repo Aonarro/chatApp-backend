@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { createMessageParams } from '../types/message'
+import { createMessageParams, DeleteMessageParams } from '../types/message'
 
 const prisma = new PrismaClient()
 
@@ -150,11 +150,94 @@ export const getMessagesByConversationId = async (conversationId: number) => {
 	})
 
 	return messages
+}
 
-	// messages.map((message) => ({
-	// 	id: message.id,
-	// 	content: message.content,
-	// 	createdAt: message.createdAt,
-	// 	author: message.author.id, // Здесь возвращаем только id
-	// }))
+export const deleteMessageById = async (params: DeleteMessageParams) => {
+	const conversation = await prisma.conversation.findFirst({
+		where: {
+			id: params.conversationId,
+		},
+		include: {
+			lastMessageSent: true,
+			messages: {
+				orderBy: { createdAt: 'desc' },
+				take: 10,
+			},
+		},
+	})
+
+	console.log('sanudusadnaudnsa', conversation)
+
+	if (!conversation) {
+		throw new Error('Conversation not found')
+	}
+
+	const message = await prisma.message.findFirst({
+		where: {
+			AND: [
+				{
+					id: params.messageId,
+				},
+				{
+					conversation: {
+						id: params.conversationId,
+					},
+				},
+				{
+					author: {
+						id: params.userId,
+					},
+				},
+			],
+		},
+	})
+
+	if (!message) {
+		throw new Error('Message not found')
+	}
+
+	//Deleting last message
+
+	if (conversation.lastMessageSent?.id !== message?.id) {
+		console.log('Deleted message')
+		return await prisma.message.delete({
+			where: { id: message?.id },
+		})
+	}
+
+	if (conversation.messages.length === 1) {
+		console.log('Deleting the 1 message')
+
+		await prisma.conversation.update({
+			where: { id: params.conversationId },
+			data: {
+				lastMessageSent: {
+					disconnect: true,
+				},
+				lastMessageSentAt: null,
+			},
+		})
+
+		await prisma.message.delete({
+			where: { id: message?.id },
+		})
+	} else {
+		console.log('Deleting and updating last message')
+		const newLastMessage =
+			conversation.messages[conversation.messages.length - 2]
+
+		await prisma.conversation.update({
+			where: { id: params.conversationId },
+			data: {
+				lastMessageSent: {
+					connect: { id: newLastMessage.id },
+				},
+				lastMessageSentAt: newLastMessage.createdAt,
+			},
+		})
+
+		await prisma.message.delete({
+			where: { id: message?.id },
+		})
+	}
 }

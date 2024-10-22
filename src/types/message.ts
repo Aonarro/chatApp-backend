@@ -1,9 +1,9 @@
-import { User } from '@prisma/client'
+import { UserWithoutPassword } from './users'
 
 export type createMessageParams = {
 	content: string
 	conversationId: number
-	user: User
+	user: UserWithoutPassword
 }
 
 type Author = {
@@ -31,4 +31,10 @@ type Conversation = {
 export type CreateMessageResponse = {
 	message: Message
 	conversation: Conversation
+}
+
+export type DeleteMessageParams = {
+	userId: number
+	conversationId: number
+	messageId: number
 }
