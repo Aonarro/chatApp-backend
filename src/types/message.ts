@@ -38,3 +38,9 @@ export type DeleteMessageParams = {
 	conversationId: number
 	messageId: number
 }
+
+export type DeleteMessageResponse = {
+	userId: number
+	conversationId: number
+	messageId: number
+}

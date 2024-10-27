@@ -65,13 +65,28 @@ export const deleteMessageFromConversation = async (
 		const typedRequest = req as Request & { user: RequestUserDetails }
 		const { conversationId, messageId } = typedRequest.params
 
+		console.log(
+			'delete message from conversation',
+			conversationId,
+			messageId,
+			typedRequest.user.id
+		)
+
 		await deleteMessageById({
 			conversationId: +conversationId,
 			messageId: +messageId,
 			userId: typedRequest.user.id,
 		})
 
-		res.sendStatus(204)
+		eventEmitter.emit('deleteMessage', {
+			userId: typedRequest.user.id,
+			conversationId: conversationId,
+			messageId: messageId,
+		})
+
+		res
+			.status(200)
+			.json({ conversationId: conversationId, messageId: messageId })
 	} catch (error) {
 		errorHandler(error, res, 404)
 	}

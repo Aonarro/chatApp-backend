@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client'
 import EventEmitter from 'events'
 import { Server as HttpServer, IncomingMessage } from 'http'
 import passport from 'passport'
@@ -5,13 +6,15 @@ import { Server, Socket } from 'socket.io'
 import { sessionMiddleware } from '..'
 import { wrap } from '../middlewares/websocketSessionMiddleware'
 import { Conversation } from '../types/conversations'
-import { CreateMessageResponse } from '../types/message'
+import { CreateMessageResponse, DeleteMessageResponse } from '../types/message'
 import { AuthenticatedSocket } from '../types/websocketSessions'
 
 export type IncomingMessageWithPassport = IncomingMessage & {
 	isAuthenticated: () => boolean
 	user?: any
 }
+
+const prisma = new PrismaClient()
 
 export const eventEmitter = new EventEmitter()
 
@@ -75,6 +78,29 @@ eventEmitter.on('createMessage', (data: CreateMessageResponse) => {
 
 	if (authorSocket) authorSocket?.emit('onMessage', data)
 	if (recipientSocket) recipientSocket?.emit('onMessage', data)
+})
+
+eventEmitter.on('deleteMessage', async (payload: DeleteMessageResponse) => {
+	const conversationMembers = await prisma.conversation.findFirst({
+		where: { id: +payload.conversationId },
+		include: {
+			creator: true,
+			recipient: true,
+		},
+	})
+
+	if (!conversationMembers) return
+
+	const { creator, recipient } = conversationMembers
+
+	const recipientSocket =
+		creator.id === payload.userId
+			? getUserSocket(recipient.id)
+			: getUserSocket(creator.id)
+
+	const { userId, ...rest } = payload
+
+	if (recipientSocket) recipientSocket.emit('onMessageDelete', { ...rest })
 })
 
 eventEmitter.on('createConversation', (payload: Conversation) => {

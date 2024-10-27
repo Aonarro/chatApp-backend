@@ -5,4 +5,4 @@ export default mongoose
 		authSource: 'admin',
 	})
 	.then(() => console.log('Connected To Database'))
-	.catch(err => console.log('Error: ', err))
+	.catch((err) => console.log('Error: ', err))
