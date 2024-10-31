@@ -15,10 +15,7 @@ export const createConversation = async (
 	try {
 		const typedRequest = req as Request & { user: RequestUserDetails }
 
-		const result = await createConversationByParams(
-			typedRequest.user.id,
-			req.body
-		)
+		const result = await createConversationByParams(typedRequest.user, req.body)
 		eventEmitter.emit('createConversation', result)
 		res.status(200).json(result)
 	} catch (error) {

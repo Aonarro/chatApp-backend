@@ -1,14 +1,16 @@
 import { PrismaClient } from '@prisma/client'
 import { CreateConversationParams } from '../types/conversations'
+import { UserWithoutPassword } from '../types/users'
+import { createMessageByParams } from './message.service'
 import { findUser } from './users.service'
 
 const prisma = new PrismaClient()
 
 export const createConversationByParams = async (
-	id: number,
+	user: UserWithoutPassword,
 	params: CreateConversationParams
 ) => {
-	const { email } = params
+	const { email, message } = params
 
 	const recipient = await findUser({ email }, { includePassword: false })
 
@@ -16,15 +18,15 @@ export const createConversationByParams = async (
 		throw new Error('Cannot create conversation')
 	}
 
-	if (id === recipient.id) {
+	if (user.id === recipient.id) {
 		throw new Error('Cannot create conversation with yourself')
 	}
 
 	const existingConversation = await prisma.conversation.findFirst({
 		where: {
 			OR: [
-				{ creatorId: id, recipientId: recipient.id },
-				{ creatorId: recipient.id, recipientId: id },
+				{ creatorId: user.id, recipientId: recipient.id },
+				{ creatorId: recipient.id, recipientId: user.id },
 			],
 		},
 	})
@@ -35,7 +37,7 @@ export const createConversationByParams = async (
 
 	const newConversation = await prisma.conversation.create({
 		data: {
-			creatorId: id,
+			creatorId: user.id,
 			recipientId: recipient.id,
 		},
 		include: {
@@ -73,9 +75,13 @@ export const createConversationByParams = async (
 		},
 	})
 
-	const { creatorId, recipientId, messageId, ...rest } = newConversation
+	await createMessageByParams({
+		content: message,
+		user: user,
+		conversationId: newConversation.id,
+	})
 
-	console.log(newConversation)
+	const { creatorId, recipientId, messageId, ...rest } = newConversation
 
 	return { ...rest }
 }

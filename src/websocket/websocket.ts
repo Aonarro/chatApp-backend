@@ -48,17 +48,40 @@ export const initializeSocket = (server: HttpServer) => {
 		socket.emit('Connected to the chat', { status: 'good' })
 
 		setUserSocket(req.user.id, socket)
-		// socket.join()
-		console.log(socket.rooms)
 
 		socket.on('onClientConnect', (data) => {
 			console.log('Client connected')
 			console.log(data)
 		})
 
-		socket.on('onTyping', (data) => {
+		socket.on('onConversationJoin', (data) => {
+			console.log(
+				`${req?.user.id} joined a Conversation of ID: ${data.conversationId}`
+			)
+			socket.join(data.conversationId)
+			console.log(socket.rooms)
+			socket.to(data.conversationId).emit('userJoin')
+		})
+
+		socket.on('onConversationLeave', (data) => {
+			console.log(
+				`${req?.user.id} leave a Conversation of ID: ${data.conversationId}`
+			)
+			socket.leave(data.conversationId)
+			console.log(socket.rooms)
+			socket.to(data.conversationId).emit('userLeave')
+		})
+
+		socket.on('onTypingStart', (data) => {
 			console.log(`начал печатать...`)
 			console.log(data)
+			socket.to(data.conversationId).emit('onTypingStart')
+		})
+
+		socket.on('onTypingStop', (data) => {
+			console.log(`перестал печатать...`)
+			console.log(data)
+			socket.to(data.conversationId).emit('onTypingStop')
 		})
 	})
 }
